@@ -28,8 +28,6 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos/"
 uptodown-dlurl = "https://google-photos.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.photos"
 
-# --- CONFIG UNIVERSAL (RVX) ---
-
 [Music-Extended]
 enabled = true
 app-name = "Music"
@@ -40,7 +38,6 @@ integrations-source = "inotia00/revanced-integrations"
 cli-version = "latest"
 integrations-version = "latest"
 rv-brand = "ReVanced Extended" 
-module-prop-name = "YouTube Music - RVX" 
 build-mode = "both"
 arch = "both"
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
@@ -56,7 +53,6 @@ integrations-source = "inotia00/revanced-integrations"
 cli-version = "latest"
 integrations-version = "latest"
 rv-brand = "ReVanced Extended"
-module-prop-name = "YouTube - RVX"
 build-mode = "both"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
