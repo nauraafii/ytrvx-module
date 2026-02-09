@@ -1,57 +1,39 @@
-# ReVanced Magisk Module
-[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/rvc_magisk)
-[![CI](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml/badge.svg?event=schedule)](https://github.com/j-hc/revanced-magisk-module/actions/workflows/ci.yml)
+# YT - MORPHE
 
-Extensive ReVanced builder  
+[![Build Status](https://github.com/nauraafii/yt-morphe/actions/workflows/build.yml/badge.svg)](https://github.com/nauraafii/yt-morphe/actions)
+[![Latest Release](https://img.shields.io/github/v/release/nauraafii/yt-morphe?label=Latest%20Release&color=blue)](https://github.com/nauraafii/yt-morphe/releases/latest)
 
-Get the [latest CI release](https://github.com/j-hc/revanced-magisk-module/releases).
+---
 
-Use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Play Store if you are using magisk modules. 
+## ⚡ Features
 
-<details><summary><big>Features</big></summary>
-<ul>
- <li>Support all present and future ReVanced and <a href="https://github.com/inotia00/revanced-patches">ReVanced Extended</a> apps</li>
- <li> Can build Magisk modules and non-root APKs</li>
- <li> Updated daily with the latest versions of apps and patches</li>
- <li> Optimize APKs and modules for size</li>
- <li> Modules</li>
-    <ul>
-     <li> recompile invalidated odex for faster usage</li>
-     <li> receive updates from Magisk app</li>
-     <li> do not break safetynet or trigger root detections</li>
-     <li> handle installation of the correct version of the stock app and all that</li>
-     <li> support Magisk and KernelSU</li>
-    </ul>
-</ul>
-Note that the <a href="../../actions/workflows/ci.yml">CI workflow</a> is scheduled to build the modules and APKs everyday using GitHub Actions if there is a change in ReVanced patches. You may want to disable it.
-</details>
+- **Powered by MorpheApp:** Always updated with the latest patches and optimizations.
+- **Optimized for Size:** Modules and APKs are compressed for efficiency.
+- **Magisk / KernelSU Support:**
+    - Handles installation of the correct stock app version automatically.
+    - Does **not** break SafetyNet/Play Integrity or trigger root detections.
+    - Recompiles invalidated odex for faster app launch.
+    - Receives updates directly via Magisk/KSU Manager.
 
-## To include/exclude patches or patch other apps
+## 📥 Download & Installation
 
- * Star the repo :eyes:
- * Use the repo as a [template](https://github.com/new?template_name=revanced-magisk-module&template_owner=j-hc)
- * Customize [`config.toml`](./config.toml) using [rvmm-config-gen](https://j-hc.github.io/rvmm-config-gen/)
- * Run the build [workflow](../../actions/workflows/build.yml)
- * Grab your modules and APKs from [releases](../../releases)
+1. Download the module from the [**Latest Release**](https://github.com/nauraafii/ytrvx/releases).
+2. Flash the ZIP file in Magisk or KernelSU.
+3. Reboot your device.
 
-also see here [`CONFIG.md`](./CONFIG.md)
+**⚠️ Important:**
+It is highly recommended to use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube from the Play Store. This prevents auto-updates from breaking the patch.
 
-## If you are having trouble with the classic mount method of the modules
-such as,
-- **"Reflash needed"** error after reboots
-- **"Suspicious mount detected"** warnings from root detector apps
+## 🔧 Troubleshooting
 
-You can consider using [rvmm-zygisk-mount](https://github.com/j-hc/rvmm-zygisk-mount)
+If you encounter issues with the classic mount method, such as:
+- **"Reflash needed"** error after reboots.
+- **"Suspicious mount detected"** warnings from banking/root detector apps.
 
-## Building Locally
-### On Termux
-```console
-bash <(curl -sSf https://raw.githubusercontent.com/j-hc/revanced-magisk-module/main/build-termux.sh)
-```
+**Solution:**
+Simply reinstall the module via Magisk/KSU to refresh the mount scripts and base APK.
 
-### On Desktop
-```console
-$ git clone https://github.com/j-hc/revanced-magisk-module
-$ cd revanced-magisk-module
-$ ./build.sh
-```
+## CREDITS
+
+- **Base Module:** [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module)
+- **Patches:** [MorpheApp](https://github.com/MorpheApp)
