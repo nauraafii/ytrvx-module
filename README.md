@@ -25,7 +25,7 @@
 It is highly recommended to use [**zygisk-detach**](https://github.com/j-hc/zygisk-detach) to detach YouTube from the Play Store. This prevents auto-updates from breaking the patch.
 
 ## 📱 Non-Root Users
-If you are installing the APKs directly (without Magisk), you **must** install GmsCore (MicroG) to enable Google Login.
+If you are installing the APKs directly (without Root Access), you **must** install GmsCore (MicroG) to enable Google Login.
 
 - **Recommended:** [ReVanced GmsCore](https://github.com/ReVanced/GmsCore/releases)
 - **Alternative:** [MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases)
