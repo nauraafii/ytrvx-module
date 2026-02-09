@@ -49,20 +49,24 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 
 [Music-Morphe]
 app-name = "Music"
-version = "8.10.52"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
+patches-version = "latest"
+cli-version = "latest"   
 rv-brand = "MorpheApp"
+module-prop-name = "YouTube Music - Morphe"
 build-mode = "both"
 arch = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube-music"
 
 [YouTube-Morphe]
 app-name = "YouTube"
-version = "20.14.43"
 patches-source = "MorpheApp/morphe-patches"
 cli-source = "MorpheApp/morphe-cli"
+patches-version = "latest"
+cli-version = "latest"
 rv-brand = "MorpheApp"
+module-prop-name = "YouTube - Morphe"
 build-mode = "both"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 
