@@ -14,20 +14,6 @@ YTRVX dibuat untuk penggunaan pribadi. Perubahan saya berfokus pada konfigurasi 
 
 Proyek ini bukan patcher baru dan tidak bertujuan menggantikan proyek asal. Untuk perubahan inti builder, template modul, atau masalah umum patching, lihat [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module) dan dokumentasi upstream terkait.
 
-## Cara kerja
-
-```text
-config.toml
-    │
-    ├── memilih aplikasi, versi, arsitektur, dan mode build
-    ▼
-Morphe Desktop + Morphe Patches
-    ▼
-APK non-root / modul ZIP
-    ▼
-GitHub Release + catatan build + SHA256SUMS.txt
-```
-
 | Komponen | Keterangan |
 | --- | --- |
 | [`config.toml`](config.toml) | Input build yang dikunci per aplikasi. |
