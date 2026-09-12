@@ -1,6 +1,6 @@
 {
   "version": "v9.15.51 (patches 1.42.0.mpp)",
-  "versionCode": 9,
-  "zipUrl": "https://github.com/nauraafii/ytrvx-module/releases/download/9/music-ytrvx-magisk-v9.15.51-arm-v7a.zip",
+  "versionCode": 10,
+  "zipUrl": "https://github.com/nauraafii/ytrvx-module/releases/download/10/music-ytrvx-magisk-v9.15.51-arm-v7a.zip",
   "changelog": "https://raw.githubusercontent.com/nauraafii/ytrvx-module/update/build.md"
 }
