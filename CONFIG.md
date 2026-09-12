@@ -52,7 +52,7 @@ Setiap blok seperti `[YouTube-Extended]` atau `[Music-Extended]` adalah satu tar
 
 | Nilai | Perilaku builder | Rekomendasi |
 | --- | --- | --- |
-| Versi eksplisit, misalnya `"21.07.247"` | Builder memaksa patcher menggunakan versi tersebut. | Pilihan paling dapat diulang untuk rilis. |
+| Versi eksplisit, misalnya `"21.13.164"` | Builder memaksa patcher menggunakan versi tersebut. | Pilihan paling dapat diulang untuk rilis. |
 | `auto` | Memilih versi tertinggi yang didukung patch default. | Aman untuk konfigurasi tanpa pilihan patch khusus. |
 | `latest` | Memilih versi stabil tertinggi dari sumber APK dan memaksa patching. | Hanya untuk eksperimen yang siap gagal bila belum kompatibel. |
 | `beta` | Memilih versi beta tertinggi dari sumber APK dan memaksa patching. | Paling berisiko; bukan pilihan rilis rutin. |
@@ -68,12 +68,12 @@ Contoh berikut membangun YouTube non-root saja, memakai versi eksplisit dan buil
 enabled = true
 app-name = "YouTube"
 build-mode = "apk"
-version = "21.07.247"
+version = "21.13.164"
 arch = "all"
 patches-source = "MorpheApp/morphe-patches"
-patches-version = "v1.41.0"
+patches-version = "v1.42.0"
 cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v1.14.0"
+cli-version = "v1.15.1"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
