@@ -14,6 +14,34 @@ Dokumen ini untuk pemilik fork yang ingin mengubah konfigurasi atau membuat rili
 
 Workflow [`Build Modules`](.github/workflows/build.yml) menyiapkan Java 21, memanggil `build.sh`, membuat `SHA256SUMS.txt`, dan mengunggah seluruh aset ke GitHub Release.
 
+Semua target aktif wajib berhasil. Jika satu unduhan, patch, atau pembuatan modul gagal, proses berhenti sebelum publikasi. Pemeriksaan output juga menolak file yang hilang, bukan arsip ZIP/APK, atau tercampur hasil build lama. Pemeriksaan ini belum membuktikan bahwa aplikasi berjalan normal di perangkat.
+
+Workflow terjadwal tetap memeriksa perubahan bundle patch. Ketika ada perubahan, seluruh target aktif dibangun bersama agar aset dan metadata update konsisten. Ringkasan validasi tersedia di halaman run; status publikasi tetap dilihat dari hasil akhir workflow.
+
+## Pemeriksaan sebelum build
+
+Workflow [`Check builder`](.github/workflows/check.yml) memeriksa konfigurasi, sintaks Bash, dan regresi tanpa signing key atau mengunduh APK. Workflow berjalan pada pull request dan push ke `main`.
+
+Pemeriksaan konfigurasi dan output memerlukan Python 3.11+ (tersedia pada runner Ubuntu). Di Windows, jalankan dari folder repository:
+
+```powershell
+python scripts/check_build.py
+python -m unittest discover -s scripts -v
+```
+
+Di Linux, pemeriksaan tambahan:
+
+```bash
+for script in build.sh utils.sh build-termux.sh scripts/check_downloads.sh; do
+  bash -n "$script" || exit 1
+done
+bash scripts/check_downloads.sh
+# Setelah build selesai, sebelum membuat checksum:
+python3 scripts/check_build.py --outputs
+```
+
+Untuk kegagalan `All APK sources failed`, cocokkan versi di `config.toml` dengan versi yang didukung patch dan tersedia di sumber APK. Menjalankan ulang versi yang sudah hilang tidak menyelesaikan masalah. Lihat [catatan pengembangan](docs/MAINTENANCE.md) untuk dasar keputusan dan langkah pemeliharaan.
+
 Sebelum menjalankannya, repositori fork memerlukan dua secret:
 
 | Secret | Isi | Digunakan untuk |

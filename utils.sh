@@ -211,10 +211,11 @@ _req() {
 		local dlp
 		dlp="$(dirname "$op")/tmp.$(basename "$op")"
 		if [ -f "$dlp" ]; then
-			while [ -f "$dlp" ]; do sleep 1; done
-			return
+			# Builds are sequential; a leftover belongs to an interrupted download.
+			rm -f -- "$dlp"
 		fi
 		if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 5 --retry 0 --fail -s -S "$@" "$ip" -o "$dlp"; then
+			rm -f -- "$dlp"
 			epr "Request failed: $ip"
 			return 1
 		fi
@@ -369,8 +370,8 @@ get_apkmirror_resp() {
 
 # -------------------- uptodown --------------------
 get_uptodown_resp() {
-	__UPTODOWN_RESP__=$(req "${1}/versions" -)
-	__UPTODOWN_RESP_PKG__=$(req "${1}/download" -)
+	__UPTODOWN_RESP__=$(req "${1}/versions" -) || return 1
+	__UPTODOWN_RESP_PKG__=$(req "${1}/download" -) || return 1
 }
 get_uptodown_vers() { $HTMLQ --text ".version" <<<"$__UPTODOWN_RESP__"; }
 dl_uptodown() {
@@ -414,6 +415,7 @@ dl_uptodown() {
 	fi
 	local data_url
 	data_url=$($HTMLQ "#detail-download-button" --attribute data-url <<<"$resp") || return 1
+	[ -n "$data_url" ] || return 1
 	if [ $is_bundle = true ]; then
 		req "https://dw.uptodown.com/dwn/${data_url}" "$output.apkm" || return 1
 		merge_splits "${output}.apkm" "${output}"
@@ -427,7 +429,7 @@ get_uptodown_pkg_name() { $HTMLQ --text "tr.full:nth-child(1) > td:nth-child(3)"
 dl_archive() {
 	local url=$1 version=$2 output=$3 arch=$4
 	local path version=${version// /}
-	path=$(grep "${version_f#v}-${arch// /}" <<<"$__ARCHIVE_RESP__") || return 1
+	path=$(grep -Fx "${__ARCHIVE_PKG_NAME__}-${version#v}-${arch// /}.apk" <<<"$__ARCHIVE_RESP__") || return 1
 	req "${url}/${path}" "$output"
 }
 get_archive_resp() {
@@ -500,7 +502,7 @@ build_rv() {
 	done
 	if [ -z "$pkg_name" ]; then
 		epr "empty pkg name, not building ${table}."
-		return 0
+		return 1
 	fi
 	local list_patches
 	list_patches=$(java -jar "$cli_jar" list-patches --patches "$patches_jar" -f "$pkg_name" -v -p 2>&1)
@@ -527,7 +529,7 @@ build_rv() {
 	fi
 	if [ -z "$version" ]; then
 		epr "empty version, not building ${table}."
-		return 0
+		return 1
 	fi
 
 	if [ "$mode_arg" = module ]; then
@@ -558,11 +560,14 @@ build_rv() {
 			fi
 			break
 		done
-		if [ ! -f "$stock_apk" ]; then return 0; fi
+		if [ ! -s "$stock_apk" ]; then
+			epr "All APK sources failed for '${table}' version '${version}'. Review config.toml and upstream supported versions."
+			return 1
+		fi
 	fi
 	if ! OP=$(check_sig "$stock_apk" "$pkg_name" 2>&1) && ! grep -qFx "ERROR: Missing META-INF/MANIFEST.MF" <<<"$OP"; then
 		epr "$pkg_name not building, apk signature mismatch '$stock_apk': $OP"
-		return 0
+		return 1
 	fi
 	log "${table}: ${version}"
 
@@ -618,7 +623,7 @@ build_rv() {
 		if [ "${NORB:-}" != true ] || [ ! -f "$patched_apk" ]; then
 			if ! patch_apk "$stock_apk" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
 				epr "Building '${table}' failed!"
-				return 0
+				return 1
 			fi
 		fi
 		if [ "$build_mode" = apk ]; then

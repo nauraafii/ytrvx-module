@@ -1,0 +1,26 @@
+name: Check builder
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Check shell syntax
+        run: |
+          for script in build.sh utils.sh build-termux.sh scripts/check_downloads.sh; do
+            bash -n "$script"
+          done
+      - name: Check release configuration
+        run: python3 scripts/check_build.py
+      - name: Test release checks
+        run: python3 -m unittest discover -s scripts
+      - name: Test download failures
+        run: bash scripts/check_downloads.sh

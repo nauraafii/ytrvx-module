@@ -3,6 +3,8 @@
 /temp
 /build
 test*
+!scripts/test_*.py
+__pycache__/
 /logs
 build.md
 cmpr

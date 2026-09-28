@@ -30,7 +30,7 @@ toml_prep "${1:-config.toml}" || abort "could not find config file '${1:-config.
 main_config_t=$(toml_get_table_main)
 COMPRESSION_LEVEL=$(toml_get "$main_config_t" compression-level) || COMPRESSION_LEVEL="9"
 if ! PARALLEL_JOBS=$(toml_get "$main_config_t" parallel-jobs); then
-	if [ "$OS" = Android ]; then PARALLEL_JOBS=1; else PARALLEL_JOBS=$(nproc); fi
+	PARALLEL_JOBS=1
 fi
 REMOVE_RV_INTEGRATIONS_CHECKS=$(toml_get "$main_config_t" remove-rv-integrations-checks) || REMOVE_RV_INTEGRATIONS_CHECKS="false"
 DEF_PATCHES_VER=$(toml_get "$main_config_t" patches-version) || DEF_PATCHES_VER="latest"
@@ -46,6 +46,9 @@ if [ "${2-}" = "--config-update" ]; then
 	config_update
 	exit 0
 fi
+
+# Keep Morphe jobs sequential, following the upstream builder's restriction.
+[ "$PARALLEL_JOBS" = 1 ] || abort "parallel-jobs must be 1 for the current Morphe builder"
 
 : >build.md
 ENABLE_MAGISK_UPDATE=$(toml_get "$main_config_t" enable-magisk-update) || ENABLE_MAGISK_UPDATE=true
@@ -78,19 +81,14 @@ verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "9d79e54ab78b0b85da9f121ec7a
 chmod 755 "${MODULE_TEMPLATE_DIR}"/bin/*/cmpr
 
 declare -A cliriplib
-idx=0
 for table_name in $(toml_get_table_names); do
 	if [ -z "$table_name" ]; then continue; fi
 	t=$(toml_get_table "$table_name")
 	enabled=$(toml_get "$t" enabled) || enabled=true
 	vtf "$enabled" "enabled"
 	if [ "$enabled" = false ]; then continue; fi
-	if ((idx >= PARALLEL_JOBS)); then
-		wait -n
-		idx=$((idx - 1))
-	fi
 
-	declare -A app_args
+	declare -A app_args=()
 	patches_src=$(toml_get "$t" patches-source) || patches_src=$DEF_PATCHES_SRC
 	patches_ver=$(toml_get "$t" patches-version) || patches_ver=$DEF_PATCHES_VER
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
@@ -160,28 +158,20 @@ for table_name in $(toml_get_table_names); do
 		app_args[arch]="arm64-v8a"
 		module_prop_name_b=${app_args[module_prop_name]}
 		app_args[module_prop_name]="${module_prop_name_b}-arm64"
-		idx=$((idx + 1))
-		build_rv "$(declare -p app_args)" &
+		build_rv "$(declare -p app_args)"
 		app_args[table]="$table_name (arm-v7a)"
 		app_args[arch]="arm-v7a"
 		app_args[module_prop_name]="${module_prop_name_b}-arm"
-		if ((idx >= PARALLEL_JOBS)); then
-			wait -n
-			idx=$((idx - 1))
-		fi
-		idx=$((idx + 1))
-		build_rv "$(declare -p app_args)" &
+		build_rv "$(declare -p app_args)"
 	else
 		if [ "${app_args[arch]}" = "arm64-v8a" ]; then
 			app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
 		elif [ "${app_args[arch]}" = "arm-v7a" ]; then
 			app_args[module_prop_name]="${app_args[module_prop_name]}-arm"
 		fi
-		idx=$((idx + 1))
-		build_rv "$(declare -p app_args)" &
+		build_rv "$(declare -p app_args)"
 	fi
 done
-wait
 rm -rf temp/tmp.*
 if [ -z "$(ls -A1 "${BUILD_DIR}")" ]; then abort "All builds failed."; fi
 

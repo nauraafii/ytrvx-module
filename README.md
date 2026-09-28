@@ -10,7 +10,7 @@ YTRVX adalah fork personal dari [j-hc/revanced-magisk-module](https://github.com
 
 ## Asal proyek dan cakupan perubahan
 
-YTRVX dibuat untuk penggunaan pribadi. Perubahan saya berfokus pada konfigurasi build—seperti aplikasi, versi, arsitektur, dan mode build—serta dokumentasi dan penyesuaian workflow sederhana.
+YTRVX dibuat untuk penggunaan pribadi. Penyesuaiannya mencakup konfigurasi aplikasi, versi, arsitektur, dokumentasi, serta pemeriksaan build dan penanganan kegagalan unduhan. Mesin patch dan template modul tetap berasal dari proyek upstream.
 
 Proyek ini bukan patcher baru dan tidak bertujuan menggantikan proyek asal. Untuk perubahan inti builder, template modul, atau masalah umum patching, lihat [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module) dan dokumentasi upstream terkait.
 
@@ -20,6 +20,7 @@ Proyek ini bukan patcher baru dan tidak bertujuan menggantikan proyek asal. Untu
 | [`build.sh`](build.sh) dan [`utils.sh`](utils.sh) | Mengunduh input, menjalankan patcher, menandatangani APK, dan membuat modul. |
 | [Build Modules](.github/workflows/build.yml) | Build rilis manual dan penerbitan asset GitHub Release. |
 | [CI](.github/workflows/ci.yml) | Pemeriksaan terjadwal atas perubahan input upstream sebelum menjalankan build. |
+| [Check builder](.github/workflows/check.yml) | Pemeriksaan konfigurasi dan regresi tanpa membuat rilis. |
 
 ## Unduh dan pasang
 
@@ -40,6 +41,8 @@ Sebelum memasang:
 ## Build dan konfigurasi
 
 Konfigurasi harian dijelaskan di [CONFIG.md](CONFIG.md). Panduan build lokal, signing key, secret GitHub Actions, dan helper Termux tersedia di [BUILDING.md](BUILDING.md).
+
+Rilis baru hanya diterbitkan jika seluruh target aktif selesai dan file keluarannya lolos pemeriksaan. Dasar perubahan builder serta prioritas pengembangan berikutnya dicatat di [catatan pemeliharaan](docs/MAINTENANCE.md).
 
 Untuk membuat rilis dari GitHub Actions:
 

@@ -19,7 +19,7 @@ Nilai ini dapat ditaruh di bagian paling atas `config.toml` dan menjadi default 
 | Opsi | Nilai / perilaku | Kapan diubah |
 | --- | --- | --- |
 | `enable-magisk-update` | `true` atau `false`. Saat build GitHub, URL update modul dibuat dari repository ini. Build lokal menonaktifkannya. | Matikan bila fork tidak ingin modul mengecek update. |
-| `parallel-jobs` | Jumlah build paralel. | Gunakan `1` pada perangkat atau runner dengan RAM terbatas. |
+| `parallel-jobs` | Saat ini hanya `1` yang didukung. | Build Morphe dijalankan berurutan mengikuti pembatasan upstream; nilai lain ditolak. |
 | `module-author` | Nama pada metadata modul. | Untuk branding fork sendiri. |
 | `rv-brand` | Brand pada nama output dan metadata. | Pertahankan brand yang berbeda dari upstream. |
 | `patches-source` / `patches-version` | Repository dan tag/ref bundle Morphe `.mpp`. | Pin ke tag yang sudah Anda review; hindari bergerak ke `latest` tanpa pengujian. |
@@ -52,8 +52,8 @@ Setiap blok seperti `[YouTube-Extended]` atau `[Music-Extended]` adalah satu tar
 
 | Nilai | Perilaku builder | Rekomendasi |
 | --- | --- | --- |
-| Versi eksplisit, misalnya `"21.13.164"` | Builder memaksa patcher menggunakan versi tersebut. | Pilihan paling dapat diulang untuk rilis. |
-| `auto` | Memilih versi tertinggi yang didukung patch default. | Aman untuk konfigurasi tanpa pilihan patch khusus. |
+| Versi eksplisit, misalnya `"21.16.256"` | Builder memaksa patcher menggunakan versi tersebut. | Review dukungan patch dan ketersediaan APK sebelum build. |
+| `auto` | Memilih versi tertinggi dengan jumlah patch terbanyak menurut CLI. | Tidak menjamin APK tersedia atau versinya tidak eksperimental. |
 | `latest` | Memilih versi stabil tertinggi dari sumber APK dan memaksa patching. | Hanya untuk eksperimen yang siap gagal bila belum kompatibel. |
 | `beta` | Memilih versi beta tertinggi dari sumber APK dan memaksa patching. | Paling berisiko; bukan pilihan rilis rutin. |
 
@@ -68,18 +68,20 @@ Contoh berikut membangun YouTube non-root saja, memakai versi eksplisit dan buil
 enabled = true
 app-name = "YouTube"
 build-mode = "apk"
-version = "21.13.164"
+version = "21.16.256"
 arch = "all"
 patches-source = "MorpheApp/morphe-patches"
-patches-version = "v1.42.0"
+patches-version = "v1.44.0"
 cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v1.15.1"
+cli-version = "v1.17.0"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 ```
 
 Contoh ini hanya menunjukkan bentuk konfigurasi. Sebelum memakai versi atau tag baru, konfirmasikan bahwa kombinasi aplikasi dan patch masih didukung oleh [Morphe Patches](https://github.com/MorpheApp/morphe-patches).
+
+Konfigurasi aktif tetap memakai `latest` untuk patch dan CLI agar pemeriksaan terjadwal bisa mendeteksi pembaruan patch. Ini praktis, tetapi hasil build tidak sepenuhnya dapat diulang. Untuk membekukan kombinasi yang sudah diuji, gunakan tag eksplisit seperti contoh di atas. Ketersediaan APK pihak ketiga tetap bisa berubah meskipun versinya dikunci.
 
 ## Patch kustom
 
