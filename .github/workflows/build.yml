@@ -52,7 +52,6 @@ jobs:
         run: ./build.sh config.toml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: $GITHUB_REPOSITORY
           NEXT_VER_CODE: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           YTRVX_KEYSTORE_PATH: ${{ runner.temp }}/ytrvx-release.p12
           YTRVX_KEYSTORE_PASSWORD: ${{ secrets.YTRVX_KEYSTORE_PASSWORD }}

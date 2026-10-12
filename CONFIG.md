@@ -75,7 +75,6 @@ patches-version = "v1.44.0"
 cli-source = "MorpheApp/morphe-desktop"
 cli-version = "v1.17.0"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
-uptodown-dlurl = "https://youtube.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 ```
 
