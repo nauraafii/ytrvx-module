@@ -118,7 +118,7 @@ get_prebuilts() {
 		elif [ "$tag" = "Patches" ]; then
 			if [ $grab_cl = true ]; then echo -e "[Changelog](https://github.com/${src}/releases/tag/${tag_name})\n" >>"${cl_dir}/changelog.md"; fi
 			if [ "$REMOVE_RV_INTEGRATIONS_CHECKS" = true ]; then
-				# Dynamically calculate inner extension (rvp->rve, mpp->mpe)
+				# Determine the inner extension dynamically (rvp -> rve, mpp -> mpe).
 				local inner_ext="${ext%p}e"
 				if ! (
 					mkdir -p "${file}-zip" || return 1
@@ -211,7 +211,7 @@ _req() {
 		local dlp
 		dlp="$(dirname "$op")/tmp.$(basename "$op")"
 		if [ -f "$dlp" ]; then
-			# Builds are sequential; a leftover belongs to an interrupted download.
+			# Builds run sequentially, so a leftover file indicates an interrupted download.
 			rm -f -- "$dlp"
 		fi
 		if ! curl -L -c "$TEMP_DIR/cookie.txt" -b "$TEMP_DIR/cookie.txt" --connect-timeout 5 --retry 0 --fail -s -S "$@" "$ip" -o "$dlp"; then
@@ -272,14 +272,14 @@ merge_splits() {
 		epr "Apkeditor ERROR: $OP"
 		return 1
 	fi
-	# this is required because of apksig
+	# Required by apksig.
 	mkdir "${bundle}-zip"
 	unzip -qo "${bundle}.mzip" -d "${bundle}-zip"
 	(
 		cd "${bundle}-zip" || abort
 		zip -0rq "${CWD}/${bundle}.zip" .
 	)
-	# if building module, sign the merged apk properly
+	# For module builds, pass the merged APK to the patcher for signing.
 	if isoneof "module" "${build_mode_arr[@]}"; then
 		patch_apk "${bundle}.zip" "${output}" "--exclusive" "${args[cli]}" "${args[ptjar]}"
 		local ret=$?
@@ -450,7 +450,7 @@ patch_apk() {
 	if [ ! -f "$YTRVX_KEYSTORE_PATH" ]; then
 		abort "YTRVX signing key was not found at the configured path."
 	fi
-	# Morphe purges scratch files by default; its CLI has no --purge flag.
+	# Morphe removes temporary files by default, and its CLI has no --purge option.
 	local cmd="env -u GITHUB_REPOSITORY java -jar '$cli_jar' patch '$stock_input' -o '$patched_apk' -p '$patches_jar' --keystore=\"\$YTRVX_KEYSTORE_PATH\" \
 --keystore-entry-password=\"\$YTRVX_KEYSTORE_PASSWORD\" --keystore-password=\"\$YTRVX_KEYSTORE_PASSWORD\" --signer=ytrvx --keystore-entry-alias=ytrvx $patcher_args"
 	if [ "$OS" = Android ]; then cmd+=" --custom-aapt2-binary='${AAPT2}'"; fi

@@ -1,36 +1,36 @@
 ---
-name: Laporan masalah
-about: Laporkan masalah build, konfigurasi, modul, atau aset rilis YTRVX.
+name: Bug report
+about: Report a YTRVX build, configuration, module, workflow, or release asset issue.
 title: ''
 labels: ''
 assignees: ''
 
 ---
 
-Gunakan template ini untuk masalah builder, konfigurasi, workflow, modul, atau aset rilis YTRVX. Laporan dalam bahasa Indonesia maupun Inggris diterima.
+Use this template for issues with the YTRVX builder, configuration, workflow, modules, or release assets. Reports may be submitted in Indonesian or English.
 
-Untuk masalah patch atau GmsCore, cek referensi upstream di [README](https://github.com/nauraafii/ytrvx-module#referensi-upstream) terlebih dahulu.
+For patch-related issues, check [Morphe Patches](https://github.com/MorpheApp/morphe-patches). For GmsCore issues, check [GmsCore](https://github.com/ReVanced/GmsCore/releases).
 
-## Masalah
+## Problem
 
-<!-- Jelaskan hasil yang diharapkan dan yang terjadi. -->
+<!-- Describe the expected result and what happened. -->
 
-## Langkah reproduksi
+## Steps to reproduce
 
 1.
 2.
 3.
 
-## Lingkungan
+## Environment
 
-- Tag rilis atau commit:
-- Nama aset:
+- Release tag or commit:
+- Asset name:
 - Mode: APK / Magisk / KernelSU
-- Versi Android dan ABI (jika relevan):
-- Versi patch dan CLI (untuk masalah build):
+- Android version and ABI (if relevant):
+- Patch and CLI versions (for build issues):
 
-## Bukti
+## Evidence
 
-<!-- Sertakan tautan workflow, potongan log error, atau tangkapan layar yang relevan.
-Hapus token, password, signing key, dan data pribadi sebelum mengirim.
+<!-- Include a workflow link, relevant error log excerpt, or screenshot.
+Remove tokens, passwords, signing keys, and personal data before submitting.
 -->

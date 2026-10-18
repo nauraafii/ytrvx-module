@@ -1,17 +1,17 @@
 # YTRVX
 
-YTRVX adalah tempatku mengatur build YouTube dan YouTube Music dengan [Morphe Patches](https://github.com/MorpheApp/morphe-patches). Proyek ini berasal dari fork [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module). Saya menyesuaikan konfigurasi untuk kebutuhan pribadi, merapikan dokumentasi, dan memperbaiki beberapa bagian alur build. Patcher dan template modulnya tetap berasal dari proyek asal.
+YTRVX is my personal setup for building YouTube and YouTube Music with [Morphe Patches](https://github.com/MorpheApp/morphe-patches). It is forked from [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module). I adapt the configuration for personal use and maintain the documentation and build workflow. The patcher and module template still come from the upstream project.
 
-## Hasil Build
+## Build outputs
 
-File ada di halaman [Releases](https://github.com/nauraafii/ytrvx-module/releases). Pilih `.apk` untuk perangkat tanpa root atau `.zip` untuk modul Magisk/KernelSU. Cocokkan juga nama aplikasi dan arsitektur (`all`, `arm64-v8a`, atau `arm-v7a`) dengan perangkatmu.
+Build files are available on the [Releases](https://github.com/nauraafii/ytrvx-module/releases) page. Choose an `.apk` for a non-rooted device or a `.zip` for a Magisk/KernelSU module. Match the app name and architecture (`all`, `arm64-v8a`, or `arm-v7a`) to your device.
 
-APK tanpa root memerlukan [GmsCore](https://github.com/ReVanced/GmsCore/releases) atau [MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases) jika ingin login. Bila signature APK berbeda dari versi yang sudah terpasang, pembaruan tidak akan berhasil; cadangkan data sebelum menghapus aplikasi lama.
+Non-root APKs require [GmsCore](https://github.com/ReVanced/GmsCore/releases) or [MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases) for sign-in. An APK signed with a different key cannot update an installed copy. Back up your data before uninstalling the existing app.
 
-## Build Manual
+## Build manually
 
-Ubah [`config.toml`](config.toml), lalu jalankan workflow [Build Modules](https://github.com/nauraafii/ytrvx-module/actions/workflows/build.yml) dari branch `main`. Periksa log dan file rilis setelah build selesai. Repo ini memerlukan signing key milikmu sendiri; langkahnya ada di [panduan build](BUILDING.md).
+Edit [`config.toml`](config.toml), then run the [Build Modules](https://github.com/nauraafii/ytrvx-module/actions/workflows/build.yml) workflow from the `main` branch. Check the workflow log and release files when it finishes. This repository requires your own signing key; see the [build guide](BUILDING.md) for setup instructions.
 
-Untuk opsi konfigurasi, lihat [CONFIG.md](CONFIG.md). Alasan perubahan dan catatan pemeliharaan ada di [MAINTENANCE.md](docs/MAINTENANCE.md).
+See [CONFIG.md](CONFIG.md) for configuration options and [MAINTENANCE.md](docs/MAINTENANCE.md) for the rationale behind changes and maintenance notes.
 
-Ini proyek pribadi, bukan aplikasi resmi Google, Morphe, atau j-hc.
+This is a personal project and is not an official Google, Morphe, or j-hc application.

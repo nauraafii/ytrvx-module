@@ -1,71 +1,71 @@
-# Panduan Build YTRVX
+# YTRVX Build Guide
 
-Dokumen ini untuk pemilik fork yang ingin mengubah konfigurasi atau membuat rilis sendiri. Untuk memilih aset rilis, lihat [README.md](README.md); untuk arti setiap opsi, lihat [CONFIG.md](CONFIG.md).
+This guide is for fork owners who want to change the configuration or create their own release. See [README.md](README.md) to choose a release asset and [CONFIG.md](CONFIG.md) to understand each option.
 
-## Pilih jalur build
+## Choose a build path
 
-| Jalur | Kapan dipakai | Dampak |
+| Path | Use it for | Effect |
 | --- | --- | --- |
-| GitHub Actions | Rilis fork sendiri | Menggunakan secret repository, membuat atau memperbarui GitHub Release. |
-| Linux atau Termux lokal | Menguji perubahan secara lokal | Tetap membutuhkan keystore pribadi dan lingkungan Bash. Build lokal tidak mengaktifkan update URL Magisk. |
-| `build-termux.sh` | Menyiapkan Termux dengan alur terpandu | Memperbarui paket, dan dapat mengganti clone lokal yang tertinggal setelah menyimpan `config.toml`. Tinjau script sebelum menjalankannya. |
+| GitHub Actions | Building a release for your fork | Uses repository secrets and creates or updates a GitHub Release. |
+| Local Linux or Termux | Testing changes locally | Requires your own keystore and a Bash environment. Local builds do not enable the Magisk update URL. |
+| `build-termux.sh` | Guided setup in Termux | Updates Termux packages and may replace an outdated local clone after saving `config.toml`. Review the script before running it. |
 
-## Build rilis dengan GitHub Actions
+## Build a release with GitHub Actions
 
-Workflow [`Build Modules`](.github/workflows/build.yml) menyiapkan Java 21, memanggil `build.sh`, membuat `SHA256SUMS.txt`, dan mengunggah seluruh aset ke GitHub Release.
+The [`Build Modules`](.github/workflows/build.yml) workflow sets up Java 21, runs `build.sh`, creates `SHA256SUMS.txt`, and uploads all assets to a GitHub Release.
 
-Semua target aktif wajib berhasil. Jika satu unduhan, patch, atau pembuatan modul gagal, proses berhenti sebelum publikasi. Pemeriksaan output juga menolak file yang hilang, bukan arsip ZIP/APK, atau tercampur hasil build lama. Pemeriksaan ini belum membuktikan bahwa aplikasi berjalan normal di perangkat.
+Every enabled target must succeed. If a download, patch, or module build fails, the workflow stops before publication. Output checks reject missing files, files that are not APK or ZIP archives, and leftover files from an earlier build. These checks do not confirm that an app works on a device.
 
-Workflow terjadwal tetap memeriksa perubahan bundle patch. Ketika ada perubahan, seluruh target aktif dibangun bersama agar aset dan metadata update konsisten. Ringkasan validasi tersedia di halaman run; status publikasi tetap dilihat dari hasil akhir workflow.
+The scheduled workflow checks for patch bundle updates. When a bundle changes, it builds all enabled targets together so the release assets and update metadata stay consistent. The run page includes a validation summary; check the workflow result to confirm publication.
 
-## Pemeriksaan sebelum build
+## Pre-build checks
 
-Workflow [`Check builder`](.github/workflows/check.yml) memeriksa konfigurasi, sintaks Bash, dan regresi tanpa signing key atau mengunduh APK. Workflow berjalan pada pull request dan push ke `main`.
+The [`Check builder`](.github/workflows/check.yml) workflow checks configuration, Bash syntax, and regressions without a signing key or APK downloads. It runs on pull requests and pushes to `main`.
 
-Pemeriksaan konfigurasi dan output memerlukan Python 3.11+ (tersedia pada runner Ubuntu). Di Windows, jalankan dari folder repository:
+Configuration and output checks require Python 3.11 or later (available on the Ubuntu runner). On Windows, run these commands from the repository directory:
 
 ```powershell
 python scripts/check_build.py
 python -m unittest discover -s scripts -v
 ```
 
-Di Linux, pemeriksaan tambahan:
+On Linux, run these additional checks:
 
 ```bash
 for script in build.sh utils.sh build-termux.sh scripts/check_downloads.sh; do
   bash -n "$script" || exit 1
 done
 bash scripts/check_downloads.sh
-# Setelah build selesai, sebelum membuat checksum:
+# After the build, before generating checksums:
 python3 scripts/check_build.py --outputs
 ```
 
-Untuk kegagalan `All APK sources failed`, cocokkan versi di `config.toml` dengan versi yang didukung patch dan tersedia di sumber APK. Menjalankan ulang versi yang sudah hilang tidak menyelesaikan masalah. Lihat [catatan pengembangan](docs/MAINTENANCE.md) untuk dasar keputusan dan langkah pemeliharaan.
+For an `All APK sources failed` error, compare the version in `config.toml` with the versions supported by the patch bundle and available from the configured APK sources. Retrying a version that is no longer available will not fix the issue. See the [maintenance notes](docs/MAINTENANCE.md) for the supporting evidence and maintenance steps.
 
-Sebelum menjalankannya, repositori fork memerlukan dua secret:
+Before running the release workflow, configure these two repository secrets:
 
-| Secret | Isi | Digunakan untuk |
+| Secret | Value | Used for |
 | --- | --- | --- |
-| `YTRVX_KEYSTORE_B64` | Keystore PKCS#12 yang sudah di-Base64 | Signing APK pada runner GitHub. |
-| `YTRVX_KEYSTORE_PASSWORD` | Password keystore dan entry `ytrvx` | Membuka keystore saat signing. |
+| `YTRVX_KEYSTORE_B64` | Your PKCS#12 keystore, encoded as Base64 | Signs APKs on the GitHub runner. |
+| `YTRVX_KEYSTORE_PASSWORD` | The keystore password and `ytrvx` entry password | Opens the keystore during signing. |
 
-Jangan menaruh nilai secret di `config.toml`, issue, log, commit, atau file yang diunggah. Setelah secret tersedia, jalankan workflow dari branch `main` dan periksa log serta aset rilis yang dibuat.
+Do not put secret values in `config.toml`, issues, logs, commits, or uploaded files. After configuring the secrets, run the workflow from `main` and review its logs and release assets.
 
-## Build lokal
+## Local build
 
-Builder adalah script Bash. Gunakan Linux, Termux, atau shell Bash yang kompatibel; PowerShell murni tidak menjalankan `build.sh` secara langsung.
+The builder is a Bash script. Use Linux, Termux, or a compatible Bash shell; PowerShell does not run `build.sh` directly.
 
-Prasyarat minimum yang diperiksa atau digunakan builder:
+The builder requires or uses:
 
-- Java 21 atau lebih baru;
-- Bash, `curl`, `jq`, dan `zip`;
-- Git clone repository beserta submodule;
-- keystore PKCS#12 pribadi dengan alias `ytrvx`;
-- variabel lingkungan `YTRVX_KEYSTORE_PATH` dan `YTRVX_KEYSTORE_PASSWORD`.
+- Java 21 or later;
+- Bash, `curl`, `jq`, and `zip`;
+- a Git checkout of this repository;
+- your own PKCS#12 keystore with the alias `ytrvx`;
+- the `YTRVX_KEYSTORE_PATH` and `YTRVX_KEYSTORE_PASSWORD` environment variables.
 
-Morphe Desktop juga mendokumentasikan Java 21+ sebagai prasyarat CLI. Lihat [dokumentasi resminya](https://github.com/MorpheApp/morphe-desktop#prerequisites) sebelum mengganti versi patcher atau bundle.
+Morphe Desktop also lists Java 21 or later as a CLI prerequisite. See its [official documentation](https://github.com/MorpheApp/morphe-desktop#prerequisites) before changing the patcher or bundle version.
 
-Contoh alur di Linux atau Termux:
+Example workflow on Linux or Termux:
 
 ```bash
 git clone --recurse-submodules https://github.com/nauraafii/ytrvx-module.git
@@ -78,16 +78,16 @@ export YTRVX_KEYSTORE_PASSWORD
 ./build.sh config.toml
 ```
 
-Hasil lokal ditulis ke direktori `build/`, yang sengaja diabaikan oleh Git. Simpan keystore di lokasi aman di luar repositori jika memungkinkan. Jangan memakai keystore rilis orang lain: pembaruan Android harus mempertahankan identitas penandatanganan yang sama.
+The local build writes output to `build/`, which Git ignores. Store the keystore in a secure location outside the repository when possible. Do not use another maintainer's release keystore: Android updates require the same signing identity.
 
-## Menyiapkan keystore sendiri
+## Create your own keystore
 
-Builder memanggil Morphe dengan alias keystore `ytrvx`. Buat keystore PKCS#12 dengan alias tersebut, simpan password secara aman, lalu ubah `YTRVX_KEYSTORE_PATH` agar menunjuk ke file itu. Referensi sintaks dan opsi `keytool` tersedia di [dokumentasi Java](https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html).
+The builder calls Morphe with the keystore alias `ytrvx`. Create a PKCS#12 keystore with that alias, store its password securely, and set `YTRVX_KEYSTORE_PATH` to the keystore file. See the [Java documentation](https://docs.oracle.com/en/java/javase/21/docs/specs/man/keytool.html) for `keytool` syntax and options.
 
-Keystore adalah identitas rilis. Bila hilang atau diganti, Android menganggap APK baru memiliki signature berbeda; pengguna biasanya harus menghapus pemasangan versi sebelumnya sebelum memasang versi baru.
+A keystore is the release identity. If you lose or replace it, Android treats the new APK as having a different signature. Users usually need to uninstall the previous app before installing the new one.
 
-## Helper Termux
+## Termux helper
 
-[`build-termux.sh`](build-termux.sh) memasang dependensi `git`, `curl`, `jq`, `openjdk-21`, dan `zip`, lalu menjalankan `build.sh`. Pada setup pertama, aplikasi meminta akses penyimpanan dan menempatkan `config.toml` serta output di `/sdcard/Download/ytrvx-module`.
+[`build-termux.sh`](build-termux.sh) installs `git`, `curl`, `jq`, `openjdk-21`, and `zip`, then runs `build.sh`. On first setup, it requests storage access and places `config.toml` and build output in `/sdcard/Download/ytrvx-module`.
 
-Script ini dirancang untuk penggunaan pribadi dan dapat memperbarui paket Termux. Jangan jalankan tanpa membaca isi script; gunakan [GitHub Actions](#build-rilis-dengan-github-actions) jika tujuan Anda adalah membuat rilis fork yang dapat direproduksi.
+The script is intended for personal use and can update Termux packages. Read it before running. Use [GitHub Actions](#build-a-release-with-github-actions) to build and publish a release for your fork.
