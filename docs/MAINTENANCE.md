@@ -1,6 +1,6 @@
 # YTRVX Maintenance
 
-Reviewed on September 28, 2026. YTRVX remains a personal fork. The builder comes from j-hc, and the patches come from Morphe. Changes focus on build reliability and clear release results.
+Reviewed on October 31, 2026. YTRVX remains a personal fork. The builder comes from j-hc, and the patches come from Morphe. Changes focus on build reliability and clear release results.
 
 ## Evidence and decisions
 
@@ -12,6 +12,8 @@ Reviewed on September 28, 2026. YTRVX remains a personal fork. The builder comes
 | The upstream builder restricts parallel builds because of CLI issues. | [Upstream `build.sh`](https://github.com/j-hc/revanced-magisk-module/blob/main/build.sh), checked on the review date above. | Run targets sequentially and keep `parallel-jobs = 1`. |
 | Failed temporary downloads can prevent fallback sources from running. | The previous `_req` waited while a temporary file existed, and the failure path did not remove that file. | Remove temporary files on failure. In the sequential builder, a leftover file from an interrupted download can then be retried. |
 | Output checks are lightweight enough to run without the patcher. | Python provides `tomllib`, `pathlib`, `zipfile`, and `unittest` in its standard library. | Use the standard library and avoid extra packages. |
+| Moving `latest` refs can change the patcher and bundle between runs. | [Run 41156457109](https://github.com/nauraafii/ytrvx-module/actions/runs/41156457109) succeeded with Desktop 1.20.0, patches 2.0.0, and YouTube 21.30.216. | Pin a tested Desktop/Patches pair, review new stable releases manually, and keep GitHub Actions SHA updates in reviewed Dependabot PRs. |
+| The `ubuntu-latest` runner label is migrating to Ubuntu 26.04. | The successful build on October 31 used Ubuntu 24.04.5. | Pin release and check workflows to Ubuntu 24.04 until the vendored tools are validated on Ubuntu 26.04. |
 
 ## Options considered
 
@@ -24,8 +26,8 @@ Reviewed on September 28, 2026. YTRVX remains a personal fork. The builder comes
 
 1. Read the release notes for [Morphe Patches](https://github.com/MorpheApp/morphe-patches/releases) and [Morphe Desktop](https://github.com/MorpheApp/morphe-desktop/releases). Distinguish stable from experimental versions.
 2. Confirm that the matching APK is available. An HTTP 200 response only confirms that the endpoint responded; still check the APK signature and patching result.
-3. Update the configuration and run `Check builder`. For reproducible results, pin the patch and CLI tags together with the APK version.
-4. Run a manual build from a reviewed commit. The current build expects four Music outputs and two YouTube outputs.
+3. Update the pinned Morphe Desktop and Patches tags together, then run `Check builder`. Review the app version against Morphe support and confirm the matching APK is still available.
+4. Run Build Modules manually from the reviewed commit. The current build expects four Music outputs and two YouTube outputs.
 5. Test installation or update, startup, sign-in, and playback on a device before describing a release as tested. Test non-root APKs and root modules separately.
 
 ## Future priorities

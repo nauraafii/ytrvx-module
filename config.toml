@@ -3,14 +3,14 @@ parallel-jobs = 1
 module-author = "Naufal"
 # Morphe bundles use .mpp files; do not apply the ReVanced integrations rewrite.
 remove-rv-integrations-checks = false
+patches-source = "MorpheApp/morphe-patches"
+patches-version = "v2.0.0"
+cli-source = "MorpheApp/morphe-desktop"
+cli-version = "v1.20.0"
 
 [Music-Extended]
 enabled = true
 app-name = "Music"
-patches-source = "MorpheApp/morphe-patches"
-patches-version = "latest"
-cli-source = "MorpheApp/morphe-desktop"
-cli-version = "latest"
 rv-brand = "YTRVX"
 build-mode = "both"
 arch = "both"
@@ -21,10 +21,6 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.a
 [YouTube-Extended]
 enabled = true
 app-name = "YouTube"
-patches-source = "MorpheApp/morphe-patches"
-patches-version = "latest"
-cli-source = "MorpheApp/morphe-desktop"
-cli-version = "latest"
 rv-brand = "YTRVX"
 build-mode = "both"
 version = "21.30.216"

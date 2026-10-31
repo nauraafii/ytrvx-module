@@ -22,8 +22,8 @@ Place these values at the top of `config.toml` to set defaults for all app table
 | `parallel-jobs` | Only `1` is currently supported. | Morphe builds run sequentially under the upstream builder's restriction; other values are rejected. |
 | `module-author` | Name in the module metadata. | Set this to brand your fork. |
 | `rv-brand` | Brand used in output names and metadata. | Use a brand distinct from upstream. |
-| `patches-source` / `patches-version` | Repository and tag or ref for the Morphe `.mpp` bundle. | Pin a tag you have reviewed; avoid using a moving `latest` ref without testing. |
-| `cli-source` / `cli-version` | Repository and tag or ref for the Morphe Desktop JAR. | Review compatibility with the patch bundle when changing either value. |
+| `patches-source` / `patches-version` | Repository and tag or ref for the Morphe `.mpp` bundle. | Keep a reviewed release tag pinned; update it with a compatible Desktop tag. |
+| `cli-source` / `cli-version` | Repository and tag or ref for the Morphe Desktop JAR. | Pin the tested tag and review compatibility with the patch bundle before changing either value. |
 | `dpi` | DPI values tried when downloading from supported sources. | Change this only when the APK source offers different DPI variants. |
 | `compression-level` | ZIP compression level from `0` to `9`. | Use a lower value for faster builds or a higher value for smaller ZIP files. |
 | `remove-rv-integrations-checks` | Must be `false` for the Morphe `.mpp` bundles used by this fork. | Do not enable it unless the builder code and bundle format change and are tested. |
@@ -61,26 +61,27 @@ The builder rejects `auto` when `included-patches`, `excluded-patches`, or `excl
 
 ## Minimal example
 
-This example builds only a non-root YouTube APK, using an explicit version and a multi-ABI build:
+This example builds only a non-root YouTube APK, using the currently tested Morphe tags and an explicit app version:
 
 ```toml
+patches-source = "MorpheApp/morphe-patches"
+patches-version = "v2.0.0"
+cli-source = "MorpheApp/morphe-desktop"
+cli-version = "v1.20.0"
+
 [YouTube-Extended]
 enabled = true
 app-name = "YouTube"
 build-mode = "apk"
-version = "21.16.256"
+version = "21.30.216"
 arch = "all"
-patches-source = "MorpheApp/morphe-patches"
-patches-version = "v1.44.0"
-cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v1.17.0"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 ```
 
 This example shows the configuration format only. Before using a new app version or tag, confirm that [Morphe Patches](https://github.com/MorpheApp/morphe-patches) supports that combination.
 
-The active configuration uses `latest` for the patch bundle and CLI so scheduled checks can detect patch updates. This is convenient but does not make builds fully reproducible. To pin a tested combination, use explicit tags as in the example. Third-party APK availability can still change even when versions are pinned.
+The active configuration pins Morphe Patches `v2.0.0` and Morphe Desktop `v1.20.0` for both apps. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
 
 ## Custom patches
 

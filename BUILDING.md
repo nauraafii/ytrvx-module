@@ -16,11 +16,13 @@ The [`Build Modules`](.github/workflows/build.yml) workflow sets up Java 21, run
 
 Every enabled target must succeed. If a download, patch, or module build fails, the workflow stops before publication. Output checks reject missing files, files that are not APK or ZIP archives, and leftover files from an earlier build. These checks do not confirm that an app works on a device.
 
-The scheduled workflow checks for patch bundle updates. When a bundle changes, it builds all enabled targets together so the release assets and update metadata stay consistent. The run page includes a validation summary; check the workflow result to confirm publication.
+The CI workflow is manual and checks whether the pinned patch bundle differs from the last build. When it does, it builds all enabled targets together so release assets and update metadata stay consistent. For a CLI-only or app-version change, run Build Modules directly. Morphe versions are reviewed and pinned; update the Desktop and Patches tags together after checking release notes, app compatibility, and APK availability. The run page includes a validation summary; check it to confirm publication.
+
+GitHub Actions references are pinned to full commit SHAs. Dependabot opens weekly update pull requests for those actions; review the pull request checks before merging.
 
 ## Pre-build checks
 
-The [`Check builder`](.github/workflows/check.yml) workflow checks configuration, Bash syntax, and regressions without a signing key or APK downloads. It runs on pull requests and pushes to `main`.
+The [`Check builder`](.github/workflows/check.yml) workflow checks configuration, Bash syntax, regressions, and the Java 21 runtime without a signing key or APK downloads. It runs on pull requests and pushes to `main`.
 
 Configuration and output checks require Python 3.11 or later (available on the Ubuntu runner). On Windows, run these commands from the repository directory:
 
