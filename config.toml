@@ -6,7 +6,7 @@ remove-rv-integrations-checks = false
 patches-source = "MorpheApp/morphe-patches"
 patches-version = "v2.1.0"
 cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v1.20.0"
+cli-version = "v2.1.1"
 
 [Music-Extended]
 enabled = true
