@@ -1,8 +1,17 @@
 name: Build Modules
 on:
   workflow_call:
+    inputs:
+      dry_run:
+        type: boolean
+        default: false
 
   workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and validate without publishing
+        type: boolean
+        default: false
 
 concurrency:
   group: ytrvx-release
@@ -86,6 +95,7 @@ jobs:
           sha256sum * > SHA256SUMS.txt
 
       - name: Upload modules to release
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAG: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
@@ -99,6 +109,7 @@ jobs:
           fi
 
       - name: Update changelog and Magisk update json
+        if: ${{ !inputs.dry_run }}
         id: update_config
         run: |
           git checkout -f update || git switch --discard-changes --orphan update
@@ -128,6 +139,7 @@ jobs:
           cd ..
 
       - name: Commit update metadata
+        if: ${{ !inputs.dry_run }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -145,7 +157,7 @@ jobs:
         env:
           TG_TOKEN: ${{ secrets.TG_TOKEN }}
           TG_CHAT: ${{ secrets.TG_CHAT }}
-        if: env.TG_TOKEN != null && env.TG_CHAT != null
+        if: ${{ !inputs.dry_run && env.TG_TOKEN != '' && env.TG_CHAT != '' }}
         run: |
           cd build || { echo "build folder not found"; exit 1; }
 

@@ -14,6 +14,8 @@ This guide is for fork owners who want to change the configuration or create the
 
 The [`Build Modules`](.github/workflows/build.yml) workflow sets up Java 21, runs `build.sh`, creates `SHA256SUMS.txt`, and uploads all assets to a GitHub Release.
 
+Select `dry_run` when dispatching Build Modules to build and validate outputs without uploading a release, updating module metadata, or sending a Telegram message. The runner's temporary build files are discarded when the job ends.
+
 Every enabled target must succeed. If a download, patch, or module build fails, the workflow stops before publication. Output checks reject missing files, files that are not APK or ZIP archives, and leftover files from an earlier build. These checks do not confirm that an app works on a device.
 
 The CI workflow is manual and checks whether the pinned patch bundle differs from the last build. When it does, it builds all enabled targets together so release assets and update metadata stay consistent. For a CLI-only or app-version change, run Build Modules directly. Morphe versions are reviewed and pinned; update the Desktop and Patches tags together after checking release notes, app compatibility, and APK availability. The run page includes a validation summary; check it to confirm publication.
