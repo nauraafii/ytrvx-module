@@ -37,6 +37,21 @@ if dl_archive https://example.org 21.13.164 ignored all; then
 	exit 1
 fi
 
+# Missing or ambiguous release assets must not select an arbitrary file.
+gh_req() { printf '%s' "$TEST_RELEASE"; }
+for TEST_RELEASE in \
+	'{"tag_name":"v1","assets":[]}' \
+	'{"tag_name":"v1","assets":[{"name":"one.jar"},{"name":"two.jar"}]}'; do
+	if failure=$(get_prebuilts Example/Desktop v1 Example/Patches v1 2>&1); then
+		echo 'Missing or ambiguous asset reported success' >&2
+		exit 1
+	fi
+	if [[ $failure != *'Expected exactly one .jar asset'* ]]; then
+		echo "Unexpected asset error: $failure" >&2
+		exit 1
+	fi
+done
+
 # Failed targets must never be reported as successful to build.sh.
 declare -A app_args=(
 	[build_mode]=both [version]=21.16.256 [app_name]=YouTube
@@ -59,7 +74,16 @@ if [[ $failure != *'PatchDefinition missing'* ]]; then
 	echo 'Patch listing error was hidden' >&2
 	exit 1
 fi
-java() { echo 'Name: Example patch'; }
+java() { printf 'Compatible versions:\n\t21.30.216\n'; }
+if failure=$(build_rv "$(declare -p app_args)" 2>&1); then
+	echo 'Unsupported version reported success' >&2
+	exit 1
+fi
+if [[ $failure != *'not listed as compatible'* ]]; then
+	echo "Unexpected compatibility error: $failure" >&2
+	exit 1
+fi
+java() { printf 'Name: Example patch\nCompatible versions:\n\t21.16.256\n'; }
 dl_archive() { return 1; }
 if build_rv "$(declare -p app_args)"; then
 	echo 'Unavailable APK reported success' >&2

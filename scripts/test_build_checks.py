@@ -6,9 +6,16 @@ import zipfile
 from pathlib import Path
 
 from check_build import expected_outputs, verify_outputs
+from release_version import next_version
 
 
 class BuildChecks(unittest.TestCase):
+    def test_release_versions(self):
+        self.assertEqual(next_version(["v100", "8", "20", "3"]), 21)
+        self.assertEqual(next_version([]), 1)
+        with self.assertRaises(ValueError):
+            next_version(["2147483647"])
+
     def setUp(self):
         self.config = {"YouTube": {"version": "21.16.256", "build-mode": "both",
                                   "archive-dlurl": "https://example.org/apks"}}

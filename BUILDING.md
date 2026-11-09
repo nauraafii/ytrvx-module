@@ -16,7 +16,11 @@ The [`Build Modules`](.github/workflows/build.yml) workflow sets up Java 21, run
 
 Select `dry_run` when dispatching Build Modules to build and validate outputs without uploading a release, updating module metadata, or sending a Telegram message. The runner's temporary build files are discarded when the job ends.
 
+If release creation succeeds but metadata publication fails, inspect the release and the failed workflow before retrying. Repair the `update` branch metadata for the published release or remove the incomplete release only after reviewing its assets. Do not reuse a tag for a different build.
+
 Every enabled target must succeed. If a download, patch, or module build fails, the workflow stops before publication. Output checks reject missing files, files that are not APK or ZIP archives, and leftover files from an earlier build. These checks do not confirm that an app works on a device.
+
+For an explicit app version, the builder checks the version-specific compatibility entries reported by Morphe when present. A listed version means at least one patch lists it; it does not guarantee that every patch or feature works. If Morphe lists no version-specific entries, this check cannot establish compatibility.
 
 The CI workflow is manual and checks whether the pinned patch bundle differs from the last build. When it does, it builds all enabled targets together so release assets and update metadata stay consistent. For a CLI-only or app-version change, run Build Modules directly. Morphe versions are reviewed and pinned; update the Desktop and Patches tags together after checking release notes, app compatibility, and APK availability. The run page includes a validation summary; check it to confirm publication.
 

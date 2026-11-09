@@ -42,9 +42,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=$(gh release list -L 1 | awk -F '\t' '{print $3}')
-          if [ -z "$TAG" ]; then TAG=0; fi
-          echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
+          TAGS=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].tag_name')
+          NEXT_VER_CODE=$(printf '%s\n' "$TAGS" | python3 scripts/release_version.py)
+          echo "NEXT_VER_CODE=$NEXT_VER_CODE" >> "$GITHUB_OUTPUT"
 
       - name: Prepare signing key
         env:
@@ -101,12 +101,14 @@ jobs:
           TAG: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           BUILD_LOG: ${{ steps.get_output.outputs.BUILD_LOG }}
         run: |
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --title "YTRVX Build $TAG" --notes "$BUILD_LOG"
-            gh release upload "$TAG" ./build/* --clobber
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG already exists; refusing to publish." >&2
+            exit 1
           else
-            gh release create "$TAG" ./build/* --title "YTRVX Build $TAG" --notes "$BUILD_LOG"
+            rc=$?
+            if [ "$rc" -ne 2 ]; then exit "$rc"; fi
           fi
+          gh release create "$TAG" ./build/* --target "$GITHUB_SHA" --title "YTRVX Build $TAG" --notes "$BUILD_LOG"
 
       - name: Update changelog and Magisk update json
         if: ${{ !inputs.dry_run }}

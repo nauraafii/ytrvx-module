@@ -93,6 +93,7 @@ for table_name in $(toml_get_table_names); do
 	patches_ver=$(toml_get "$t" patches-version) || patches_ver=$DEF_PATCHES_VER
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
+	pr "Using Desktop $cli_src $cli_ver and patches $patches_src $patches_ver for $table_name"
 
 	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
 		abort "could not download rv prebuilts"

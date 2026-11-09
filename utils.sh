@@ -88,15 +88,16 @@ get_prebuilts() {
 		file=$(find "$dir" -name "${fprefix}-${name_ver#v}.${ext}" -type f 2>/dev/null)
 		if [ -z "$file" ]; then
 			local resp asset name
-			resp=$(gh_req "$rv_rel" -) || return 1
-			tag_name=$(jq -r '.tag_name' <<<"$resp")
-			matches=$(jq -e ".assets | map(select(.name | endswith(\"$ext\")))" <<<"$resp")
+			resp=$(gh_req "$rv_rel" -) || { epr "Unable to fetch $tag release $src $ver."; return 1; }
+			tag_name=$(jq -er '.tag_name | select(type == "string" and length > 0)' <<<"$resp") || { epr "Invalid release response for $src $ver."; return 1; }
+			matches=$(jq -e --arg suffix ".$ext" '[.assets[] | select(.name | endswith($suffix))]' <<<"$resp") || { epr "Invalid assets for $src $ver."; return 1; }
 			if [ "$(jq 'length' <<<"$matches")" -ne 1 ]; then
-				epr "More than 1 asset was found for this cli release. Fallbacking to the first one found..."
+				epr "Expected exactly one .$ext asset for $src $ver; found $(jq 'length' <<<"$matches")."
+				return 1
 			fi
 			asset=$(jq -r ".[0]" <<<"$matches")
-			url=$(jq -r .url <<<"$asset")
-			name=$(jq -r .name <<<"$asset")
+			url=$(jq -er '.url | select(type == "string" and length > 0)' <<<"$asset") || { epr "Missing asset URL for $src $ver."; return 1; }
+			name=$(jq -er '.name | select(type == "string" and length > 0)' <<<"$asset") || { epr "Missing asset name for $src $ver."; return 1; }
 			file="${dir}/${name}"
 			gh_dl "$file" "$url" >&2 || return 1
 			echo "$tag: $(cut -d/ -f1 <<<"$src")/${name}  " >>"${cl_dir}/changelog.md"
@@ -508,6 +509,13 @@ build_rv() {
 	if ! list_patches=$(java -jar "$cli_jar" list-patches --patches "$patches_jar" -f "$pkg_name" -v -p 2>&1); then
 		epr "Unable to load patches for '${table}': ${list_patches}"
 		return 1
+	fi
+	if ! isoneof "$version_mode" auto latest beta && grep -qF 'Compatible versions:' <<<"$list_patches"; then
+		if ! awk -v version="$version_mode" '{ gsub(/^[[:space:]]+|[[:space:]]+$/, ""); if ($0 == version) found=1 } END { exit !found }' <<<"$list_patches"; then
+			epr "Version '$version_mode' for '$table' is not listed as compatible by the selected patch bundle."
+			return 1
+		fi
+		pr "Version '$version_mode' is listed by the patch bundle for '$table'."
 	fi
 
 	local get_latest_ver=false
