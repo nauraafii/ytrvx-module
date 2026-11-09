@@ -65,9 +65,9 @@ This example builds only a non-root YouTube APK, using the currently tested Morp
 
 ```toml
 patches-source = "MorpheApp/morphe-patches"
-patches-version = "v2.0.0"
+patches-version = "v2.1.0"
 cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v1.20.0"
+cli-version = "v2.1.1"
 
 [YouTube-Extended]
 enabled = true
@@ -81,7 +81,7 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.y
 
 This example shows the configuration format only. Before using a new app version or tag, confirm that [Morphe Patches](https://github.com/MorpheApp/morphe-patches) supports that combination.
 
-The active configuration pins Morphe Patches `v2.0.0` and Morphe Desktop `v1.20.0` for both apps. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
+The active configuration pins Morphe Patches `v2.1.0` and Morphe Desktop `v2.1.1` for both apps. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
 
 ## Custom patches
 
