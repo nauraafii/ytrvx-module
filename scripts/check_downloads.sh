@@ -50,6 +50,15 @@ cli_jar=unused
 patches_jar=unused
 get_archive_resp() { return 0; }
 get_archive_pkg_name() { echo com.google.android.youtube; }
+java() { echo 'PatchDefinition missing' >&2; return 1; }
+if failure=$(build_rv "$(declare -p app_args)" 2>&1); then
+	echo 'Failed patch listing reported success' >&2
+	exit 1
+fi
+if [[ $failure != *'PatchDefinition missing'* ]]; then
+	echo 'Patch listing error was hidden' >&2
+	exit 1
+fi
 java() { echo 'Name: Example patch'; }
 dl_archive() { return 1; }
 if build_rv "$(declare -p app_args)"; then

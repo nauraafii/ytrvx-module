@@ -505,7 +505,10 @@ build_rv() {
 		return 1
 	fi
 	local list_patches
-	list_patches=$(java -jar "$cli_jar" list-patches --patches "$patches_jar" -f "$pkg_name" -v -p 2>&1)
+	if ! list_patches=$(java -jar "$cli_jar" list-patches --patches "$patches_jar" -f "$pkg_name" -v -p 2>&1); then
+		epr "Unable to load patches for '${table}': ${list_patches}"
+		return 1
+	fi
 
 	local get_latest_ver=false
 	if [ "$version_mode" = auto ]; then
