@@ -1,6 +1,7 @@
 """Offline regression checks; run python -m unittest discover -s scripts."""
 
 import tempfile
+import tomllib
 import unittest
 import zipfile
 from pathlib import Path
@@ -15,6 +16,22 @@ class BuildChecks(unittest.TestCase):
         self.assertEqual(next_version([]), 1)
         with self.assertRaises(ValueError):
             next_version(["2147483647"])
+
+    def test_active_config_uses_stable_morphe_and_excludes_branding(self):
+        config_path = Path(__file__).parent.parent / "config.toml"
+        with config_path.open("rb") as stream:
+            config = tomllib.load(stream)
+
+        self.assertEqual(config["patches-version"], "v2.3.0")
+        self.assertEqual(config["cli-version"], "v2.2.0")
+        for app_name in ("Music-Extended", "YouTube-Extended"):
+            with self.subTest(app=app_name):
+                self.assertEqual(
+                    config[app_name]["excluded-patches"],
+                    '"Custom branding"',
+                )
+                self.assertNotIn("included-patches", config[app_name])
+                self.assertFalse(config[app_name].get("exclusive-patches", False))
 
     def setUp(self):
         self.config = {"YouTube": {"version": "21.16.256", "build-mode": "both",

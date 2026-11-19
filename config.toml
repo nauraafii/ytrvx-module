@@ -4,9 +4,9 @@ module-author = "Naufal"
 # Morphe bundles use .mpp files; do not apply the ReVanced integrations rewrite.
 remove-rv-integrations-checks = false
 patches-source = "MorpheApp/morphe-patches"
-patches-version = "v2.2.0"
+patches-version = "v2.3.0"
 cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v2.1.1"
+cli-version = "v2.2.0"
 
 [Music-Extended]
 enabled = true
@@ -15,6 +15,7 @@ rv-brand = "YTRVX"
 build-mode = "both"
 arch = "both"
 version = "9.15.51"
+excluded-patches = '"Custom branding"'
 uptodown-dlurl = "https://youtube-music.en.uptodown.com/android"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.apps.youtube.music"
 
@@ -24,6 +25,7 @@ app-name = "YouTube"
 rv-brand = "YTRVX"
 build-mode = "both"
 version = "21.30.216"
+excluded-patches = '"Custom branding"'
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 uptodown-dlurl = "https://youtube.en.uptodown.com/android"

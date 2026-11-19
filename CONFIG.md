@@ -40,7 +40,7 @@ Each table, such as `[YouTube-Extended]` or `[Music-Extended]`, defines one buil
 | `version` | An explicit version, `auto`, `latest`, or `beta`. | See [Version selection](#version-selection). |
 | `arch` | `all`, `arm64-v8a`, `arm-v7a`, or `both`. | `both` runs separate builds for the two ABIs; `all` requests a multi-ABI build. |
 | `uptodown-dlurl`, `apkmirror-dlurl`, `archive-dlurl` | App source URLs. | Set at least one. The builder tries available sources if one fails. |
-| `included-patches` / `excluded-patches` | Lists of patch names to force on or off. | Quote patch names and use an explicit app version. |
+| `included-patches` / `excluded-patches` | Space-separated, double-quoted patch names stored in one TOML string. | Use an explicit app version. Example: `excluded-patches = '"Custom branding"'`. |
 | `exclusive-patches` | When `true`, uses only the selected patches. | This is high risk because required default patches may be omitted. |
 | `include-stock` | Includes the stock APK in the module ZIP; defaults to `true`. | This makes module installation more reliable but increases ZIP size. |
 | `module-author` | Overrides the author for this target. | Other targets are unchanged. |
@@ -65,9 +65,9 @@ This example builds only a non-root YouTube APK, using the currently tested Morp
 
 ```toml
 patches-source = "MorpheApp/morphe-patches"
-patches-version = "v2.1.0"
+patches-version = "v2.3.0"
 cli-source = "MorpheApp/morphe-desktop"
-cli-version = "v2.1.1"
+cli-version = "v2.2.0"
 
 [YouTube-Extended]
 enabled = true
@@ -75,17 +75,24 @@ app-name = "YouTube"
 build-mode = "apk"
 version = "21.30.216"
 arch = "all"
+excluded-patches = '"Custom branding"'
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/youtube"
 archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.youtube"
 ```
 
 This example shows the configuration format only. Before using a new app version or tag, confirm that [Morphe Patches](https://github.com/MorpheApp/morphe-patches) supports that combination.
 
-The active configuration pins Morphe Patches `v2.1.0` and Morphe Desktop `v2.1.1` for both apps. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
+The active configuration pins Morphe Patches `v2.3.0` and Morphe Desktop `v2.2.0` for both apps. The app versions `21.30.216` and `9.15.51` are supported stable targets for this patch bundle. It excludes `Custom branding` to preserve each app's stock name and icon while leaving other upstream-default patches enabled. `Change header` remains available as an optional feature; it does not replace the logo unless a custom header image is configured. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
 
 ## Custom patches
 
-The CLI receives patch names, so spelling must exactly match the upstream patch list. In TOML, double single quotes when a patch name contains a single quote. For example: `Hide ''Get Music Premium''`.
+The CLI receives patch names, so spelling must exactly match the upstream patch list. Use one TOML string containing each patch name in double quotes, separated by spaces. For example:
+
+```toml
+excluded-patches = '"Custom branding"'
+```
+
+In TOML, double single quotes when a patch name contains a single quote. For example: `Hide ''Get Music Premium''`.
 
 Start with a small change: select one patch, pin the app and bundle versions, build, and review the output. Do not manually include or exclude GmsCore/microG patches; the builder handles them differently for non-root APKs and root modules.
 

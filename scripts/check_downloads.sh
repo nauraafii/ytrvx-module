@@ -52,6 +52,19 @@ for TEST_RELEASE in \
 	fi
 done
 
+# Multi-word patch exclusions must survive TOML parsing as separate CLI names.
+set_prebuilts
+toml_prep config.toml
+for table_name in Music-Extended YouTube-Extended; do
+	t=$(toml_get_table "$table_name")
+	selected=$(toml_get "$t" excluded-patches)
+	patch_args=$(join_args "$selected" -d)
+	if [ "$patch_args" != '-d "Custom branding"' ]; then
+		echo "Unexpected patch arguments for $table_name: $patch_args" >&2
+		exit 1
+	fi
+done
+
 # Failed targets must never be reported as successful to build.sh.
 declare -A app_args=(
 	[build_mode]=both [version]=21.16.256 [app_name]=YouTube
