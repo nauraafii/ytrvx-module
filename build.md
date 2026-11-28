@@ -7,6 +7,6 @@ Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach root YouTub
 
 [ytrvx-module](https://github.com/nauraafii/ytrvx-module)
   
-CLI: MorpheApp/morphe-desktop-2.2.0-all.jar  
-Patches: MorpheApp/patches-2.3.0.mpp  
-[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v2.3.0)  
+CLI: MorpheApp/morphe-desktop-2.4.0-all.jar  
+Patches: MorpheApp/patches-2.4.0.mpp  
+[Changelog](https://github.com/MorpheApp/morphe-patches/releases/tag/v2.4.0)  
