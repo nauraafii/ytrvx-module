@@ -131,9 +131,9 @@ jobs:
           for OUTPUT in *magisk*.zip; do
             [ "$OUTPUT" = "*magisk*.zip" ] && continue
             ZIP_S=$(unzip -p "$OUTPUT" module.prop)
-            if ! UPDATE_JSON=$(echo "$ZIP_S" | grep updateJson); then continue; fi
+            if ! UPDATE_JSON=$(echo "$ZIP_S" | grep '^updateJson='); then continue; fi
             UPDATE_JSON="${UPDATE_JSON##*/}"
-            VER=$(echo "$ZIP_S" | grep version=)
+            VER=$(echo "$ZIP_S" | grep '^version=')
             VER="${VER##*=}"
             DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
             get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
@@ -190,6 +190,6 @@ jobs:
           ${APKS}
           "
           echo "'$MSG'"
-          MSG=${MSG:0:9450}
+          MSG=${MSG:0:4000}
           POST="https://api.telegram.org/bot${TG_TOKEN}/sendMessage"
-          curl -X POST --data-urlencode "parse_mode=Markdown" --data-urlencode "disable_web_page_preview=true" --data-urlencode "text=${MSG}" --data-urlencode "chat_id=${TG_CHAT}" "$POST"
+          curl -fsS -X POST --data-urlencode "parse_mode=Markdown" --data-urlencode "disable_web_page_preview=true" --data-urlencode "text=${MSG}" --data-urlencode "chat_id=${TG_CHAT}" "$POST" || echo "::warning::Telegram notification failed"

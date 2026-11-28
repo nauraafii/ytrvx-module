@@ -63,24 +63,29 @@ for file in "$TEMP_DIR"/*/changelog.md; do
     [ -f "$file" ] && : > "$file"
 done
 
-mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
 verify_sha256() {
 	local file=$1 expected=$2 actual
 	actual=$(sha256sum "$file" | awk '{print $1}')
 	[ "$actual" = "$expected" ] || abort "checksum verification failed for '$file'"
 }
-CMPR_RELEASE=20240303
-gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/download/${CMPR_RELEASE}/cmpr-arm64-v8a"
-verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "ef7abdea70c69c64e353807ec89d4a81e36b832c99d2874ff97d00f0609bc7a1"
-gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/download/${CMPR_RELEASE}/cmpr-armeabi-v7a"
-verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "da273d0c7fbc66a5a5d30e7e5f1fb3d505d5ea64da6cff4973f32bfc1507fbb1"
-gh_dl "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/download/${CMPR_RELEASE}/cmpr-x86"
-verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "aaa7abd1f7eb6c3ba23324294fc7a5f1082771e9d86d8fd9545369d0e179a06e"
-gh_dl "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "https://github.com/j-hc/cmpr/releases/download/${CMPR_RELEASE}/cmpr-x86_64"
-verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "9d79e54ab78b0b85da9f121ec7a93efbb14aebbf48bc04712d90b67bfdc95e3e"
-chmod 755 "${MODULE_TEMPLATE_DIR}"/bin/*/cmpr
+CMPR_READY=false
+ensure_cmpr() {
+	if [ "$CMPR_READY" = true ]; then return; fi
+	mkdir -p "${MODULE_TEMPLATE_DIR}/bin/arm64" "${MODULE_TEMPLATE_DIR}/bin/arm" "${MODULE_TEMPLATE_DIR}/bin/x86" "${MODULE_TEMPLATE_DIR}/bin/x64"
+	local cmpr_release=20240303
+	gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/download/${cmpr_release}/cmpr-arm64-v8a"
+	verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "ef7abdea70c69c64e353807ec89d4a81e36b832c99d2874ff97d00f0609bc7a1"
+	gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "https://github.com/j-hc/cmpr/releases/download/${cmpr_release}/cmpr-armeabi-v7a"
+	verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/arm/cmpr" "da273d0c7fbc66a5a5d30e7e5f1fb3d505d5ea64da6cff4973f32bfc1507fbb1"
+	gh_dl "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "https://github.com/j-hc/cmpr/releases/download/${cmpr_release}/cmpr-x86"
+	verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/x86/cmpr" "aaa7abd1f7eb6c3ba23324294fc7a5f1082771e9d86d8fd9545369d0e179a06e"
+	gh_dl "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "https://github.com/j-hc/cmpr/releases/download/${cmpr_release}/cmpr-x86_64"
+	verify_sha256 "${MODULE_TEMPLATE_DIR}/bin/x64/cmpr" "9d79e54ab78b0b85da9f121ec7a93efbb14aebbf48bc04712d90b67bfdc95e3e"
+	chmod 755 "${MODULE_TEMPLATE_DIR}"/bin/*/cmpr
+	CMPR_READY=true
+}
 
-declare -A cliriplib
+declare -A cliriplib prebuilts_cache
 for table_name in $(toml_get_table_names); do
 	if [ -z "$table_name" ]; then continue; fi
 	t=$(toml_get_table "$table_name")
@@ -95,8 +100,14 @@ for table_name in $(toml_get_table_names); do
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 	pr "Using Desktop $cli_src $cli_ver and patches $patches_src $patches_ver for $table_name"
 
-	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
-		abort "could not download rv prebuilts"
+	prebuilts_key="${cli_src}|${cli_ver}|${patches_src}|${patches_ver}"
+	if [[ -v prebuilts_cache[$prebuilts_key] ]]; then
+		PREBUILTS=${prebuilts_cache[$prebuilts_key]}
+	else
+		if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
+			abort "could not download rv prebuilts"
+		fi
+		prebuilts_cache[$prebuilts_key]=$PREBUILTS
 	fi
 	read -r cli_jar patches_jar <<<"$PREBUILTS"
 	app_args[cli]=$cli_jar
@@ -110,7 +121,7 @@ for table_name in $(toml_get_table_names); do
 			app_args[riplib]=false
 		fi
 	fi
-	if [ "${app_args[riplib]}" = "true" ] && [ "$(toml_get "$t" riplib)" = "false" ]; then app_args[riplib]=false; fi
+	if [ "${app_args[riplib]}" = "true" ] && [ "$(toml_get "$t" riplib || :)" = "false" ]; then app_args[riplib]=false; fi
 	app_args[rv_brand]=$(toml_get "$t" rv-brand) || app_args[rv_brand]=$DEF_RV_BRAND
 	app_args[module_author]=$(toml_get "$t" module-author) || app_args[module_author]=$DEF_MODULE_AUTHOR
 
@@ -128,6 +139,7 @@ for table_name in $(toml_get_table_names); do
 			abort "ERROR: build-mode '${app_args[build_mode]}' is not a valid option for '${table_name}': only 'both', 'apk' or 'module' is allowed"
 		fi
 	} || app_args[build_mode]=apk
+	if [ "${app_args[build_mode]}" != "apk" ]; then ensure_cmpr; fi
 	app_args[uptodown_dlurl]=$(toml_get "$t" uptodown-dlurl) && {
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%/}
 		app_args[uptodown_dlurl]=${app_args[uptodown_dlurl]%download}

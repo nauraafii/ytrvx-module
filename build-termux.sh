@@ -42,9 +42,10 @@ if [ -d "$PROJECT_NAME" ] || [ -f config.toml ]; then
 	if git status | grep -q 'is behind\|fatal'; then
 		pr "${PROJECT_NAME} is not synced with upstream."
 		pr "Cloning ${PROJECT_NAME}. config.toml will be preserved."
+		REPO_DIR=$(basename "$PWD")
 		cd ..
-		cp -f "$PROJECT_NAME/config.toml" .
-		rm -rf "$PROJECT_NAME"
+		cp -f "$REPO_DIR/config.toml" .
+		rm -rf "$REPO_DIR"
 		git clone "$PROJECT_REPO" --recurse --depth 1 "$PROJECT_NAME"
 		mv -f config.toml "$PROJECT_NAME/config.toml"
 		cd "$PROJECT_NAME"

@@ -65,7 +65,7 @@ This example builds only a non-root YouTube APK, using the currently tested Morp
 
 ```toml
 patches-source = "MorpheApp/morphe-patches"
-patches-version = "v2.3.0"
+patches-version = "v2.4.0"
 cli-source = "MorpheApp/morphe-desktop"
 cli-version = "v2.2.0"
 
@@ -82,7 +82,7 @@ archive-dlurl = "https://archive.org/download/jhc-apks/apks/com.google.android.y
 
 This example shows the configuration format only. Before using a new app version or tag, confirm that [Morphe Patches](https://github.com/MorpheApp/morphe-patches) supports that combination.
 
-The active configuration pins Morphe Patches `v2.3.0` and Morphe Desktop `v2.2.0` for both apps. The app versions `21.30.216` and `9.15.51` are supported stable targets for this patch bundle. It excludes `Custom branding` to preserve each app's stock name and icon while leaving other upstream-default patches enabled. `Change header` remains available as an optional feature; it does not replace the logo unless a custom header image is configured. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
+The active configuration pins Morphe Patches `v2.4.0` and Morphe Desktop `v2.2.0` for both apps. The app versions `21.30.216` and `9.15.51` are supported stable targets for this patch bundle. It excludes `Custom branding` to preserve each app's stock name and icon while leaving other upstream-default patches enabled. `Change header` remains available as an optional feature; it does not replace the logo unless a custom header image is configured. Review upstream releases and update the pair together; the manual CI workflow can detect a changed patch bundle and start a build. For a CLI-only or app-version change, run Build Modules directly. GitHub Actions references are pinned to commit SHAs, and Dependabot proposes weekly updates for those actions. APK sources remain external and may stop serving a pinned version.
 
 ## Custom patches
 

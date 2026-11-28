@@ -85,7 +85,7 @@ get_prebuilts() {
 		fi
 
 		local url file tag_name name
-		file=$(find "$dir" -name "${fprefix}-${name_ver#v}.${ext}" -type f 2>/dev/null)
+		file=$(find "$dir" -maxdepth 1 -name "*-${name_ver#v}.${ext}" -type f 2>/dev/null)
 		if [ -z "$file" ]; then
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || { epr "Unable to fetch $tag release $src $ver."; return 1; }
@@ -109,8 +109,7 @@ get_prebuilts() {
 			else file=$(grep "/[^/]*${ver#v}[^/]*\$" <<<"$file" | head -1); fi
 			if [ -z "$file" ]; then abort "filter fail: '$for_err' with '$ver'"; fi
 			name=$(basename "$file")
-			tag_name=$(cut -d'-' -f3- <<<"$name")
-			tag_name=v${tag_name%.*}
+			tag_name=$(sed -E 's/^[^0-9]*([0-9].*)\.[^.]+$/v\1/' <<<"$name")
 		fi
 
 		if [ "$tag" = "CLI" ]; then
@@ -175,11 +174,13 @@ config_update() {
 			else
 				last_patches=$(gh_req "$rv_rel/tags/${PATCHES_VER}" -)
 			fi
-			if ! last_patches=$(jq -e -r ".assets[] | select(.name | endswith(\"$PATCH_EXT\")) | .name" <<<"$last_patches"); then
+			local ext_re='\.(mpp|rvp)$'
+			[ -n "$PATCH_EXT" ] && ext_re="\\.${PATCH_EXT}$"
+			if ! last_patches=$(jq -e -r --arg re "$ext_re" '.assets[] | select(.name | test($re)) | .name' <<<"$last_patches"); then
 				abort oops
 			fi
 			if [ "$last_patches" ]; then
-				if ! OP=$(grep "^Patches: ${PATCHES_SRC%%/*}/" build.md | grep "$last_patches"); then
+				if ! OP=$(grep "^Patches: ${PATCHES_SRC%%/*}/" build.md | grep -F "$last_patches"); then
 					sources["$PATCHES_SRC/$PATCHES_VER"]=1
 					prcfg=true
 					upped+=("$table_name")
@@ -281,12 +282,11 @@ merge_splits() {
 		zip -0rq "${CWD}/${bundle}.zip" .
 	)
 	# For module builds, pass the merged APK to the patcher for signing.
+	local ret=0
 	if isoneof "module" "${build_mode_arr[@]}"; then
-		patch_apk "${bundle}.zip" "${output}" "--exclusive" "${args[cli]}" "${args[ptjar]}"
-		local ret=$?
+		patch_apk "${bundle}.zip" "${output}" "--exclusive" "${args[cli]}" "${args[ptjar]}" || ret=$?
 	else
-		cp "${bundle}.zip" "${output}"
-		local ret=$?
+		cp "${bundle}.zip" "${output}" || ret=$?
 	fi
 	rm -r "${bundle}-zip" "${bundle}.zip" "${bundle}.mzip" || :
 	return $ret
@@ -583,10 +583,11 @@ build_rv() {
 	log "${table}: ${version}"
 
 	local microg_patch
-	microg_patch=$(grep "^Name: " <<<"$list_patches" | grep -i "gmscore\|microg" || :) microg_patch=${microg_patch#*: }
-	if [ -n "$microg_patch" ] && [[ ${p_patcher_args[*]} =~ $microg_patch ]]; then
+	microg_patch=$(grep "^Name: " <<<"$list_patches" | grep -i -m1 "gmscore\|microg" || :) microg_patch=${microg_patch#*: }
+	if [ -n "$microg_patch" ] && [[ ${p_patcher_args[*]} == *"$microg_patch"* ]]; then
 		epr "You cant include/exclude microg patch as that's done by rvmm builder automatically."
-		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
+		p_patcher_args=("${p_patcher_args[@]//-[de] \"${microg_patch}\"/}")
+		p_patcher_args=("${p_patcher_args[@]//-[de] ${microg_patch}/}")
 	fi
 
 	local patcher_args patched_apk build_mode
@@ -639,11 +640,12 @@ build_rv() {
 
 		module_config "$base_template" "$pkg_name" "$version" "$arch"
 
-		local patches_ver="${patches_jar##*-}"
+		local patches_ver
+		patches_ver=$(basename "$patches_jar" | sed -E 's/^[^0-9]*([0-9].*)\.[^.]+$/\1/')
 		module_prop \
 			"${args[module_prop_name]}" \
 			"${app_name} ${args[rv_brand]}" \
-			"${version} (patches ${patches_ver%%.$PATCH_EXT})" \
+			"${version} (patches ${patches_ver})" \
 			"${app_name} ${args[rv_brand]} Magisk module" \
 			"${args[module_author]}" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY-}/update/${upj}" \

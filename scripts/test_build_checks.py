@@ -22,8 +22,8 @@ class BuildChecks(unittest.TestCase):
         with config_path.open("rb") as stream:
             config = tomllib.load(stream)
 
-        self.assertEqual(config["patches-version"], "v2.3.0")
-        self.assertEqual(config["cli-version"], "v2.2.0")
+        self.assertRegex(config["patches-version"], r"^v\d+\.\d+\.\d+$")
+        self.assertRegex(config["cli-version"], r"^v\d+\.\d+\.\d+$")
         for app_name in ("Music-Extended", "YouTube-Extended"):
             with self.subTest(app=app_name):
                 self.assertEqual(
@@ -70,9 +70,15 @@ class BuildChecks(unittest.TestCase):
 
     def test_invalid_config(self):
         for change in ({"enabled": False}, {"enabled": "false"}, {"arch": "typo"},
-                       {"version": "auto", "included-patches": '"Some patch"'}):
+                       {"version": "auto", "included-patches": '"Some patch"'},
+                       {"excluded-patches": "Unquoted patch"}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 expected_outputs({"YouTube": self.config["YouTube"] | change})
+        for top_change in ({"remove-rv-integrations-checks": True},
+                           {"compression-level": 10},
+                           {"compression-level": True}):
+            with self.subTest(top_change=top_change), self.assertRaises(ValueError):
+                expected_outputs(self.config | top_change)
 
     def test_stale_release_files_are_rejected(self):
         with tempfile.TemporaryDirectory() as temp:

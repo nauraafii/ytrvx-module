@@ -92,6 +92,7 @@ int main(int argc, char* argv[]) {
     long uid = atol(argv[1]);
 
     struct ksu_uid_should_umount_cmd umount_cmd = {0};
+    umount_cmd.uid = (uint32_t)uid;
     if (!ksuctl(KSU_IOCTL_UID_SHOULD_UMOUNT, &umount_cmd)) {
         REPORT_ERR();
         return 1;
@@ -113,7 +114,8 @@ int main(int argc, char* argv[]) {
     if (!ksuctl(KSU_IOCTL_GET_APP_PROFILE, &profile)) {
         printf("Create profile for %s\n", argv[2]);
         profile.version = KSU_APP_PROFILE_VER;
-        strncpy(profile.key, argv[2], sizeof(profile.key) / sizeof(profile.key[0]));
+        strncpy(profile.key, argv[2], sizeof(profile.key) - 1);
+        profile.key[sizeof(profile.key) - 1] = '\0';
     }
 
     profile.nrp_config.use_default = false;

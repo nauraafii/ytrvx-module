@@ -110,4 +110,24 @@ if build_rv "$(declare -p app_args)"; then
 	echo 'Failed patch reported success' >&2
 	exit 1
 fi
+
+# config_update must filter only patch bundle assets even when PATCH_EXT is unset.
+(
+	cd "$TEMP_DIR"
+	PATCH_EXT=""
+	DEF_PATCHES_SRC="MorpheApp/morphe-patches"
+	DEF_PATCHES_VER="v2.4.0"
+	gh_req() { printf '{"assets":[{"name":"patches-2.4.0.mpp"},{"name":"patches-2.4.0.mpp.asc"},{"name":"patches.json"}]}'; }
+	printf 'Patches: MorpheApp/patches-2.4.0.mpp  \n' > build.md
+	if [ -n "$(config_update)" ]; then
+		echo 'config_update falsely triggered when current patch bundle matches build.md' >&2
+		exit 1
+	fi
+	printf 'Patches: MorpheApp/patches-2.3.0.mpp  \n' > build.md
+	if ! config_update | grep -q '"YouTube-Extended"'; then
+		echo 'config_update failed to detect updated patch bundle' >&2
+		exit 1
+	fi
+)
+
 echo 'Download and target failure regression checks passed'

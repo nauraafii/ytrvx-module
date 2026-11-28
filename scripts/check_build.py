@@ -10,6 +10,11 @@ from pathlib import Path
 def expected_outputs(config):
     if config.get("parallel-jobs", 1) != 1:
         raise ValueError("parallel-jobs must be 1 for Morphe")
+    if config.get("remove-rv-integrations-checks", False) is not False:
+        raise ValueError("remove-rv-integrations-checks must be false for Morphe")
+    compression = config.get("compression-level", 9)
+    if isinstance(compression, bool) or not isinstance(compression, int) or not 0 <= compression <= 9:
+        raise ValueError("compression-level must be an integer between 0 and 9")
     outputs = []
     for name, app in config.items():
         if not isinstance(app, dict):
@@ -25,6 +30,10 @@ def expected_outputs(config):
         if version == "auto" and any(app.get(key) for key in
                                      ("included-patches", "excluded-patches", "exclusive-patches")):
             raise ValueError(f"{name}: custom patches require an explicit version")
+        for patch_key in ("included-patches", "excluded-patches"):
+            patch_val = app.get(patch_key)
+            if patch_val and (not isinstance(patch_val, str) or '"' not in patch_val):
+                raise ValueError(f"{name}: patch names inside {patch_key} must be quoted")
         if not any(app.get(f"{source}-dlurl") for source in ("archive", "apkmirror", "uptodown")):
             raise ValueError(f"{name}: no APK source configured")
         mode, arch = app.get("build-mode", "apk"), app.get("arch", "all")

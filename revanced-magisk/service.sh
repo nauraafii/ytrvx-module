@@ -33,7 +33,7 @@ run() {
 		err "version mismatch (installed:${VERSION}, module:$PKG_VER)"
 		return
 	fi
-	grep "$PKG_NAME" /proc/mounts | while read -r line; do
+	grep -F "$PKG_NAME" /proc/mounts | while read -r line; do
 		mp=${line#* } mp=${mp%% *}
 		umount -l "${mp%%\\*}"
 	done

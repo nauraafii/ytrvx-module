@@ -25,6 +25,9 @@ jobs:
           for script in build.sh utils.sh build-termux.sh scripts/check_downloads.sh; do
             bash -n "$script"
           done
+          for script in revanced-magisk/customize.sh revanced-magisk/service.sh revanced-magisk/uninstall.sh; do
+            sh -n "$script"
+          done
       - name: Check release configuration
         run: python3 scripts/check_build.py
       - name: Test release checks
