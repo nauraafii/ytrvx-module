@@ -85,7 +85,7 @@ get_prebuilts() {
 		fi
 
 		local url file tag_name name
-		file=$(find "$dir" -maxdepth 1 -name "*-${name_ver#v}.${ext}" -type f 2>/dev/null)
+		file=$(find "$dir" -maxdepth 1 -name "*-${name_ver#v}*.${ext}" -type f 2>/dev/null)
 		if [ -z "$file" ]; then
 			local resp asset name
 			resp=$(gh_req "$rv_rel" -) || { epr "Unable to fetch $tag release $src $ver."; return 1; }
